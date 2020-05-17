@@ -3,12 +3,8 @@ import 'package:cdn_refresher/models.dart';
 import 'package:cdn_refresher/redux/actions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-typedef void OnAddPressFuc(desc, url);
-class _ViewModel {
-  final OnAddPressFuc onAddPressFuc;
 
-  _ViewModel({@required this.onAddPressFuc});
-}
+
 class AddPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -30,24 +26,16 @@ class _AddState extends State<AddPage> {
     dbHelper.init();
   }
 
-  void _onClickAdd() {
-
-
-  }
-
   void saveToDB(remark, content) {
-    dbHelper.insert(remark, content).then((value) =>
-    {
-      if (Navigator.canPop(context)) {Navigator.pop(context)}
-    });
+    dbHelper.insert(remark, content).then((value) => {
+          if (Navigator.canPop(context)) {Navigator.pop(context)}
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, _ViewModel>(
-      converter: (store)=> new _ViewModel(onAddPressFuc: (desc, url)=>
-      store.dispatch(new AddAction(desc: desc, url:  url))),
-      builder: (context, viewModel) {
+    return StoreBuilder<AppState>(
+      builder: (context, store) {
         return Scaffold(
             appBar: AppBar(
               // Here we take the value from the MyHomePage object that was created by
@@ -62,10 +50,9 @@ class _AddState extends State<AddPage> {
                     if (remark.isEmpty | content.isEmpty) {
                       return;
                     }
-                    viewModel.onAddPressFuc(remark, content);
+                    store.dispatch(new AddAction(desc: remark, url: content));
                     saveToDB(remark, content);
                   },
-
                 )
               ],
             ),

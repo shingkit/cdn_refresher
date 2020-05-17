@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
-
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
@@ -33,9 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initData(store) async {
     DBHelper dbHelper = new DBHelper();
-    dbHelper
-        .init()
-        .then((value) async {
+    dbHelper.init().then((value) async {
       List<Task> newlist = await dbHelper.queryAll();
       store.dispatch(new AddAllAction(tasks: newlist));
     });
@@ -48,15 +45,15 @@ class _MyHomePageState extends State<MyHomePage> {
       onInit: (store) {
         initData(store);
       },
-      builder: (context, list) =>
-          Scaffold(
-            appBar: AppBar(
-              // Here we take the value from the MyHomePage object that was created by
-              // the App.build method, and use it to set our appbar title.
-              title: Text(widget.title),
-            ),
-            body: ListView.builder(
-                itemCount: list.length, itemBuilder: (ctx, index) {
+      builder: (context, list) => Scaffold(
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(widget.title),
+        ),
+        body: ListView.builder(
+            itemCount: list.length,
+            itemBuilder: (ctx, index) {
               return Card(
                 child: Container(
                   height: 60,
@@ -66,20 +63,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.white,
                 elevation: 5,
               );
-            })
-                .build(context),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () =>
-              {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (BuildContext buildContext) {
-                      return AddPage();
-                    }))
-              },
-              tooltip: '添加',
-              child: Icon(Icons.add),
-            ), // This trailing comma makes auto-formatting nicer for build methods.
-          ),
+            }).build(context),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (BuildContext buildContext) {
+              return AddPage();
+            }))
+          },
+          tooltip: '添加',
+          child: Icon(Icons.add),
+        ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
