@@ -1,6 +1,5 @@
-import 'package:cdn_refresher/bean.dart';
+import 'package:cdn_refresher/models.dart';
 import 'package:sqflite/sqflite.dart';
-import 'dart:async';
 
 class DBHelper {
   static const String TABLE_LIST = "list";
@@ -22,6 +21,7 @@ class DBHelper {
 
   Future getDBPath() async {
     return await getDatabasesPath() + "/x.db";
+
   }
 
   Future insert(remark, url) async {
@@ -33,11 +33,11 @@ class DBHelper {
   Future queryAll() async {
     List<Map<String, dynamic>> list =
         await db.rawQuery('select * from $TABLE_LIST');
-    List<CDNItem> result = new List();
+    List<Task> result = new List();
     if (list != null && list.length > 0) {
       for (int i = 0; i < list.length; i++){
         Map item = list[i];
-        result.add(new CDNItem(item["_id"], item["_remark"], item["_url"]));
+        result.add(new Task(item["_remark"], item["_url"], id: item["_id"]));
       }
     }
     return result;
