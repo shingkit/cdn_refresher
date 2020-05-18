@@ -6,8 +6,8 @@ import 'package:redux/redux.dart';
 import 'homepage.dart';
 
 
+var store = new Store<AppState>(appReducer, initialState: new AppState.initialState());
 void main() {
-  final store = new Store<AppState>(appReducer, initialState: new AppState.initialState());
   runApp(new MyApp(store));
 }
 

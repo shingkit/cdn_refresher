@@ -1,9 +1,7 @@
 import 'package:cdn_refresher/db_helper.dart';
-import 'package:cdn_refresher/models.dart';
+import 'package:cdn_refresher/main.dart';
 import 'package:cdn_refresher/redux/actions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
-
 
 class AddPage extends StatefulWidget {
   @override
@@ -27,58 +25,56 @@ class _AddState extends State<AddPage> {
   }
 
   void saveToDB(remark, content) {
-    dbHelper.insert(remark, content).then((value) => {
-          if (Navigator.canPop(context)) {Navigator.pop(context)}
-        });
+    dbHelper.insert(remark, content).then((value) {
+      if (Navigator.canPop(context)) {
+        store.dispatch(new AddAction(desc: remark, url: content));
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return StoreBuilder<AppState>(
-      builder: (context, store) {
-        return Scaffold(
-            appBar: AppBar(
-              // Here we take the value from the MyHomePage object that was created by
-              // the App.build method, and use it to set our appbar title.
-              title: Text('添加'),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.save),
-                  onPressed: () {
-                    var remark = _remarkController.text;
-                    var content = _contentController.text;
-                    if (remark.isEmpty | content.isEmpty) {
-                      return;
-                    }
-                    store.dispatch(new AddAction(desc: remark, url: content));
-                    saveToDB(remark, content);
-                  },
+    return Scaffold(
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text('添加'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.save),
+              onPressed: () {
+                var remark = _remarkController.text;
+                var content = _contentController.text;
+                if (remark.isEmpty | content.isEmpty) {
+                  return;
+                }
+                saveToDB(remark, content);
+              },
+            )
+          ],
+        ),
+        body: Container(
+          padding: EdgeInsets.all(8),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("别名", style: TextStyle(fontSize: 20)),
+                TextField(
+                  controller: _remarkController,
+                  key: _RemarkKey,
+                  style: TextStyle(fontSize: 18),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (str) => {},
+                ),
+                Text("列表(换行分割)", style: TextStyle(fontSize: 20)),
+                TextField(
+                  key: _contentKey,
+                  controller: _contentController,
+                  maxLines: null,
+                  style: TextStyle(fontSize: 18),
                 )
-              ],
-            ),
-            body: Container(
-              padding: EdgeInsets.all(8),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text("别名", style: TextStyle(fontSize: 20)),
-                    TextField(
-                      controller: _remarkController,
-                      key: _RemarkKey,
-                      style: TextStyle(fontSize: 18),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (str) => {},
-                    ),
-                    Text("列表(换行分割)", style: TextStyle(fontSize: 20)),
-                    TextField(
-                      key: _contentKey,
-                      controller: _contentController,
-                      maxLines: null,
-                      style: TextStyle(fontSize: 18),
-                    )
-                  ]),
-            ));
-      },
-    );
+              ]),
+        ));
   }
 }

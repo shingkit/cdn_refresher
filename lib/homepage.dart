@@ -1,7 +1,6 @@
 import 'package:cdn_refresher/addpage.dart';
 import 'package:cdn_refresher/db_helper.dart';
 import 'package:cdn_refresher/models.dart';
-import 'package:cdn_refresher/redux/actions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -33,8 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initData(store) async {
     DBHelper dbHelper = new DBHelper();
     dbHelper.init().then((value) async {
-      List<Task> newlist = await dbHelper.queryAll();
-      store.dispatch(new AddAllAction(tasks: newlist));
+      dbHelper.queryAll();
     });
   }
 
