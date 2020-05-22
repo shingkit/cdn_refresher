@@ -27,7 +27,7 @@ class DBHelper {
   }
 
   Future insert(remark, url) async {
-    await db.execute(
+    await db.rawInsert(
         'INSERT INTO $TABLE_LIST($columnRemark, $columnURL)VALUES(?,?)',
         [remark, url]);
   }
@@ -44,5 +44,17 @@ class DBHelper {
     }
     store.dispatch(new AddAllAction(tasks: result));
     return result;
+  }
+
+  void close(){
+    if (db.isOpen){
+      db.close();
+    }
+  }
+
+  Future<int> removeTask(Task task) async {
+    var id = task.id.toInt();
+    int size = await db.rawDelete('delete from $TABLE_LIST where $columnId = ?', [id]);
+    return size;
   }
 }

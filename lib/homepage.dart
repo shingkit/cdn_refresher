@@ -1,5 +1,6 @@
 import 'package:cdn_refresher/addpage.dart';
 import 'package:cdn_refresher/db_helper.dart';
+import 'package:cdn_refresher/http_client.dart';
 import 'package:cdn_refresher/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -24,44 +25,110 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  DBHelper dbHelper = new DBHelper();
+  GlobalKey _refreshIndicatorKey = new GlobalKey();
+
   @override
   void initState() {
     super.initState();
+    initData();
   }
 
-  void initData(store) async {
-    DBHelper dbHelper = new DBHelper();
+  @override
+  void dispose() {
+    dbHelper.close();
+    super.dispose();
+  }
+
+  void initData() async {
     dbHelper.init().then((value) async {
-      dbHelper.queryAll();
+      dbHelper.queryAll().then((value) => {
+      });
     });
+  }
+
+  void removeTask(task) {
+    dbHelper.removeTask(task).then((value) {
+      if (value > 0) {
+        print("删除任务 " + task.id.toString() + "成功，查询全部");
+        initData();
+      }
+    });
+  }
+
+  Widget buildItem(BuildContext context, List<Task> list, int index) {
+    return Card(
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onLongPress: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('确定要删除吗？'),
+                        actions: [
+                          FlatButton(
+                              onPressed: () {
+                                removeTask(list[index]);
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('确定')),
+                          FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('取消'))
+                        ],
+                      );
+                    });
+              },
+              child: Container(
+                height: 60,
+                padding: EdgeInsets.all(8),
+                child: Text(list[index].remark + ':${list[index].id}'),
+              ),
+            ),
+          ),
+          FlatButton(
+            child: Text("刷新"),
+            onPressed: () {
+              HttpClient().requestRefresh(list[index].url).then((value) => {
+                    Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Text('刷新成功'),
+                    ))
+                  });
+            },
+          )
+        ],
+      ),
+      color: Colors.white,
+      elevation: 5,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, List<Task>>(
       converter: (store) => store.state.tasks,
-      onInit: (store) {
-        initData(store);
-      },
       builder: (context, list) => Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: Text(widget.title),
         ),
-        body: ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (ctx, index) {
-              return Card(
-                child: Container(
-                  height: 60,
-                  padding: EdgeInsets.all(8),
-                  child: Text(list[index].remark),
-                ),
-                color: Colors.white,
-                elevation: 5,
-              );
-            }).build(context),
+        body: RefreshIndicator(
+          key: _refreshIndicatorKey,
+          onRefresh: () async{
+            initData();
+            return;
+          },
+          child: ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (ctx, index) => buildItem(ctx, list, index))
+              .build(context),
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => {
             Navigator.push(context,

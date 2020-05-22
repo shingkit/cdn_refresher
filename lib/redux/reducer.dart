@@ -14,7 +14,7 @@ List<Task> tasksReducer(List<Task> state, action) {
   }
   if (action is AddAllAction){
     return <Task>[]
-      ..addAll(state)
+//      ..addAll(state)
       ..addAll(action.tasks);
   }
   return state;
