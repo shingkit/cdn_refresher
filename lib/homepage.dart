@@ -1,10 +1,11 @@
 import 'package:cdn_refresher/addpage.dart';
 import 'package:cdn_refresher/db_helper.dart';
 import 'package:cdn_refresher/http_client.dart';
-import 'package:cdn_refresher/models.dart';
+import 'package:cdn_refresher/models/model.dart';
+import 'package:cdn_refresher/models/task.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -42,7 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initData() async {
     dbHelper.init().then((value) async {
-      dbHelper.queryAll().then((value) => {
+      dbHelper.queryAll().then((value) {
+        Provider.of<AppModel>(context, listen: false).setTasks(value);
       });
     });
   }
@@ -50,9 +52,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void removeTask(task) {
     dbHelper.removeTask(task).then((value) {
       if (value > 0) {
-        print("删除任务 " + task.id.toString() + "成功，查询全部");
-        initData();
+        print("删除任务 " + task.id.toString() + "成功");
       }
+      initData();
     });
   }
 
@@ -110,36 +112,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, List<Task>>(
-      converter: (store) => store.state.tasks,
-      builder: (context, list) => Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-        ),
-        body: RefreshIndicator(
+    return Scaffold(
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+      ),
+      body: RefreshIndicator(
           key: _refreshIndicatorKey,
-          onRefresh: () async{
+          onRefresh: () async {
             initData();
             return;
           },
-          child: ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (ctx, index) => buildItem(ctx, list, index))
-              .build(context),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (BuildContext buildContext) {
-              return AddPage();
-            }))
-          },
-          tooltip: '添加',
-          child: Icon(Icons.add),
-        ), // This trailing comma makes auto-formatting nicer for build methods.
-      ),
+          child: Consumer<AppModel>(
+              builder: (context, model, child) => ListView.builder(
+                  itemCount: model.tasks.length,
+                  itemBuilder: (ctx, index) =>
+                      buildItem(ctx, model.tasks, index)).build(context))),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return AddPage();
+          }));
+          initData();
+        },
+        tooltip: '添加',
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

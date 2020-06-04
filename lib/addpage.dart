@@ -1,7 +1,8 @@
 import 'package:cdn_refresher/db_helper.dart';
-import 'package:cdn_refresher/main.dart';
-import 'package:cdn_refresher/redux/actions.dart';
+import 'package:cdn_refresher/models/model.dart';
+import 'package:cdn_refresher/models/task.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AddPage extends StatefulWidget {
   @override
@@ -27,7 +28,6 @@ class _AddState extends State<AddPage> {
   void saveToDB(remark, content) {
     dbHelper.insert(remark, content).then((value) {
       if (Navigator.canPop(context)) {
-        store.dispatch(new AddAction(desc: remark, url: content));
         Navigator.pop(context);
       }
     });
@@ -49,6 +49,7 @@ class _AddState extends State<AddPage> {
                 if (remark.isEmpty | content.isEmpty) {
                   return;
                 }
+                Provider.of<AppModel>(context, listen: false).addTask(Task(remark, content));
                 saveToDB(remark, content);
               },
             )

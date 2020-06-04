@@ -1,6 +1,4 @@
-import 'package:cdn_refresher/main.dart';
-import 'package:cdn_refresher/models.dart';
-import 'package:cdn_refresher/redux/actions.dart';
+import 'package:cdn_refresher/models/task.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
@@ -42,7 +40,6 @@ class DBHelper {
         result.add(new Task(item["_remark"], item["_url"], id: item["_id"]));
       }
     }
-    store.dispatch(new AddAllAction(tasks: result));
     return result;
   }
 
